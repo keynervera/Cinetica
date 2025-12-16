@@ -1,0 +1,196 @@
+from django.core.management.base import BaseCommand
+from core.models import Content, Type, AgeRating
+
+MOVIES = [
+    {
+        "title": "Spiderman",
+        "release_year": 2002,
+        "duration": "121 min",
+        "synopsis": "Peter Parker obtiene poderes arácnidos y enfrenta a Green Goblin.",
+        "image_route": "https://m.media-amazon.com/images/I/81bA3jvYz0L._AC_SY679_.jpg",
+        "calification_general": 7.6,
+        "genres": ["Acción", "Aventura"],
+        "languages": ["Inglés", "Español"],
+        "streaming": ["Netflix"],
+    },
+    {
+        "title": "Interstellar",
+        "release_year": 2014,
+        "duration": "169 min",
+        "synopsis": "Un equipo viaja por un agujero de gusano para salvar a la humanidad.",
+        "image_route": "https://m.media-amazon.com/images/I/91kFYg4fX3L._AC_SL1500_.jpg",
+        "calification_general": 8.6,
+        "genres": ["Ciencia ficción", "Drama"],
+        "languages": ["Inglés"],
+        "streaming": ["HBO Max"],
+    },
+    {
+        "title": "The Dark Knight",
+        "release_year": 2008,
+        "duration": "152 min",
+        "synopsis": "Batman enfrenta al Joker en Gotham.",
+        "image_route": "https://m.media-amazon.com/images/I/71pVn8S8pLL._AC_SY679_.jpg",
+        "calification_general": 9.0,
+        "genres": ["Acción", "Crimen"],
+        "languages": ["Inglés"],
+        "streaming": ["Amazon Prime"],
+    },
+    {
+        "title": "Inception",
+        "release_year": 2010,
+        "duration": "148 min",
+        "synopsis": "Un ladrón entra en los sueños para implantar una idea.",
+        "image_route": "https://m.media-amazon.com/images/I/91G7nKzU+CL._AC_SL1500_.jpg",
+        "calification_general": 8.8,
+        "genres": ["Ciencia ficción", "Acción"],
+        "languages": ["Inglés", "Español"],
+        "streaming": ["Netflix"],
+    },
+    {
+        "title": "The Matrix",
+        "release_year": 1999,
+        "duration": "136 min",
+        "synopsis": "Un hacker descubre la verdad sobre su realidad y el sistema que la controla.",
+        "image_route": "https://m.media-amazon.com/images/I/51EG732BV3L.jpg",
+        "calification_general": 8.7,
+        "genres": ["Ciencia ficción", "Acción"],
+        "languages": ["Inglés"],
+        "streaming": ["HBO Max"],
+    },
+    {
+        "title": "Gladiator",
+        "release_year": 2000,
+        "duration": "155 min",
+        "synopsis": "Un general romano busca justicia tras ser traicionado.",
+        "image_route": "https://m.media-amazon.com/images/I/51A9XG5JXDL.jpg",
+        "calification_general": 8.5,
+        "genres": ["Acción", "Drama"],
+        "languages": ["Inglés", "Español"],
+        "streaming": ["Amazon Prime"],
+    },
+    {
+        "title": "Fight Club",
+        "release_year": 1999,
+        "duration": "139 min",
+        "synopsis": "Un hombre desilusionado crea un club secreto que se sale de control.",
+        "image_route": "https://m.media-amazon.com/images/I/51v5ZpFyaFL.jpg",
+        "calification_general": 8.8,
+        "genres": ["Drama", "Suspenso"],
+        "languages": ["Inglés"],
+        "streaming": ["Disney+"],
+    },
+    {
+        "title": "Forrest Gump",
+        "release_year": 1994,
+        "duration": "142 min",
+        "synopsis": "La vida de Forrest se cruza con momentos clave de la historia moderna.",
+        "image_route": "https://m.media-amazon.com/images/I/61+9rU+u9EL._AC_SY679_.jpg",
+        "calification_general": 8.8,
+        "genres": ["Drama", "Romance"],
+        "languages": ["Inglés", "Español"],
+        "streaming": ["Netflix"],
+    },
+    {
+        "title": "The Shawshank Redemption",
+        "release_year": 1994,
+        "duration": "142 min",
+        "synopsis": "Un hombre condenado injustamente encuentra esperanza en prisión.",
+        "image_route": "https://m.media-amazon.com/images/I/51NiGlapXlL.jpg",
+        "calification_general": 9.3,
+        "genres": ["Drama", "Crimen"],
+        "languages": ["Inglés"],
+        "streaming": ["HBO Max"],
+    },
+    {
+        "title": "Pulp Fiction",
+        "release_year": 1994,
+        "duration": "154 min",
+        "synopsis": "Historias criminales se entrelazan en Los Ángeles con humor oscuro.",
+        "image_route": "https://m.media-amazon.com/images/I/71c05lTE03L._AC_SY679_.jpg",
+        "calification_general": 8.9,
+        "genres": ["Crimen", "Drama"],
+        "languages": ["Inglés"],
+        "streaming": ["Amazon Prime"],
+    },
+    {
+        "title": "Titanic",
+        "release_year": 1997,
+        "duration": "195 min",
+        "synopsis": "Un romance nace a bordo del Titanic antes de la tragedia.",
+        "image_route": "https://m.media-amazon.com/images/I/71lG1w9p8JL._AC_SY679_.jpg",
+        "calification_general": 7.9,
+        "genres": ["Drama", "Romance"],
+        "languages": ["Inglés", "Español"],
+        "streaming": ["Disney+"],
+    },
+    {
+        "title": "Parasite",
+        "release_year": 2019,
+        "duration": "132 min",
+        "synopsis": "Una familia se infiltra en la vida de una casa rica con consecuencias inesperadas.",
+        "image_route": "https://m.media-amazon.com/images/I/81Qk8v2TtIL._AC_SL1500_.jpg",
+        "calification_general": 8.6,
+        "genres": ["Drama", "Suspenso"],
+        "languages": ["Coreano"],
+        "streaming": ["Amazon Prime"],
+    },
+    {
+        "title": "Joker",
+        "release_year": 2019,
+        "duration": "122 min",
+        "synopsis": "El origen de un villano marcado por el abandono y la violencia social.",
+        "image_route": "https://m.media-amazon.com/images/I/71bK7m8o2WL._AC_SY679_.jpg",
+        "calification_general": 8.4,
+        "genres": ["Drama", "Crimen"],
+        "languages": ["Inglés", "Español"],
+        "streaming": ["HBO Max"],
+    },
+    {
+        "title": "Avengers: Endgame",
+        "release_year": 2019,
+        "duration": "181 min",
+        "synopsis": "Los Vengadores intentan revertir el caos causado por Thanos.",
+        "image_route": "https://m.media-amazon.com/images/I/81ExhpBEbHL._AC_SL1500_.jpg",
+        "calification_general": 8.4,
+        "genres": ["Acción", "Aventura"],
+        "languages": ["Inglés", "Español"],
+        "streaming": ["Disney+"],
+    },
+    {
+        "title": "Toy Story",
+        "release_year": 1995,
+        "duration": "81 min",
+        "synopsis": "Los juguetes cobran vida cuando los humanos no miran.",
+        "image_route": "https://m.media-amazon.com/images/I/71aBLa7FJ5L._AC_SY679_.jpg",
+        "calification_general": 8.3,
+        "genres": ["Animación", "Aventura"],
+        "languages": ["Inglés", "Español"],
+        "streaming": ["Disney+"],
+    },
+]
+
+class Command(BaseCommand):
+    help = "Pobla la base de datos de CINETICA con películas demo."
+
+    def handle(self, *args, **options):
+        movie_type, _ = Type.objects.get_or_create(name="Película")
+        age_rating, _ = AgeRating.objects.get_or_create(abbreviation="PG-13")
+
+        created = 0
+        for m in MOVIES:
+            obj, was_created = Content.objects.get_or_create(
+                title=m["title"],
+                defaults={
+                    "type": movie_type,
+                    "age_rating": age_rating,
+                    "release_year": m["release_year"],
+                    "duration": m["duration"],
+                    "synopsis": m["synopsis"],
+                    "image_route": m["image_route"],
+                    "calification_general": m["calification_general"],
+                }
+            )
+            if was_created:
+                created += 1
+
+        self.stdout.write(self.style.SUCCESS(f"Seed terminado. Películas creadas: {created}"))
